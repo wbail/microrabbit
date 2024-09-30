@@ -1,14 +1,19 @@
-﻿using MediatR.NotificationPublishers;
+﻿using MediatR;
+using MediatR.NotificationPublishers;
 using MicroRabbit.Banking.Application.Interfaces;
 using MicroRabbit.Banking.Application.Services;
 using MicroRabbit.Banking.Data.Context;
 using MicroRabbit.Banking.Data.Repository;
+using MicroRabbit.Banking.Domain.CommandHandlers;
+using MicroRabbit.Banking.Domain.Commands;
+using MicroRabbit.Banking.Domain.Events;
 using MicroRabbit.Banking.Domain.Interfaces;
 using MicroRabbit.Domain.Core.Bus;
 using MicroRabbit.Infra.Bus;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using RabbitMQ.Client;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,10 +36,10 @@ public static class DependencyContainer
         });
 
         // Domain Bus
-        //_ = services.AddTransient<IEventBus, RabbitMQBus>();
+        _ = services.AddTransient<IEventBus, RabbitMQBus>();
 
-        // Domain Events
-        //services.AddTransient<IEventHandler<TransferCreatedEvent>, TransferEventHandler>();
+        // Domain banking commands
+        services.AddTransient<IRequestHandler<CreateTransferCommand, bool>, TransferCommandHandler>();
 
         // Application Services
         services.AddTransient<IAccountService, AccountService>();
@@ -46,6 +51,7 @@ public static class DependencyContainer
         {
             options.UseNpgsql(configuration.GetConnectionString("BankingDbContext"));
         });
+
 
         services.AddTransient<IAccountRepository, AccountRepository>();
         //services.AddTransient<BankingDbContext>();

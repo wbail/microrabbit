@@ -2,6 +2,7 @@
 using MicroRabbit.Domain.Core.Bus;
 using MicroRabbit.Domain.Core.Commands;
 using MicroRabbit.Domain.Core.Events;
+using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System.Text;
@@ -12,19 +13,28 @@ namespace MicroRabbit.Infra.Bus;
 public class RabbitMQBus : IEventBus
 {
     private readonly IMediator _mediator;
+    private readonly RabbitMqProperties _rabbitMqProperties;
     private readonly Dictionary<string, List<Type>> _handlers;
     private readonly List<Type> _eventTypes;
 
-    public RabbitMQBus(IMediator mediator)
+    public RabbitMQBus(IMediator mediator, IOptions<RabbitMqProperties> rabbitMqProperties)
     {
         _mediator = mediator;
         _handlers = new Dictionary<string, List<Type>>();
         _eventTypes = new List<Type>();
+        _rabbitMqProperties = rabbitMqProperties.Value;
     }
 
     public void Publish<T>(T @event) where T : Event
     {
-        var factory = new ConnectionFactory() { HostName = "localhost" };
+        var factory = new ConnectionFactory()
+        {
+            HostName = _rabbitMqProperties.HostName,
+            Port = _rabbitMqProperties.Port,
+            UserName = _rabbitMqProperties.UserName,
+            Password = _rabbitMqProperties.Password,
+        };
+
         using (var connection = factory.CreateConnection())
         using (var channel = connection.CreateModel())
         {
@@ -73,7 +83,15 @@ public class RabbitMQBus : IEventBus
 
     private void StartBasicConsume<T>() where T : Event
     {
-        var factory = new ConnectionFactory() { HostName = "localhost", DispatchConsumersAsync = true };
+        var factory = new ConnectionFactory()
+        {
+            HostName = _rabbitMqProperties.HostName,
+            Port = _rabbitMqProperties.Port,
+            UserName = _rabbitMqProperties.UserName,
+            Password = _rabbitMqProperties.Password,
+            DispatchConsumersAsync = true
+        };
+
         var connection = factory.CreateConnection();
         var channel = connection.CreateModel();
         var eventName = typeof(T).Name;

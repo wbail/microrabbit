@@ -1,4 +1,7 @@
+using MicroRabbit.Infra.Bus;
 using MicroRabbit.Infra.IoC;
+using Microsoft.AspNetCore.Builder.Extensions;
+using Microsoft.Extensions.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +15,7 @@ builder.Services.AddSwaggerGen(config =>
     config.SwaggerDoc("v1", new() { Title = "MicroRabbit.Banking.Api", Version = "v1" });
 });
 
+builder.Services.Configure<RabbitMqProperties>(builder.Configuration.GetSection("RabbitMQ"));
 DependencyContainer.RegisterServices(builder.Services, builder.Configuration);
 
 var app = builder.Build();

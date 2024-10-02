@@ -2,8 +2,8 @@
 
 public class TransferLog
 {
-    public int Id { get; set; }
-    public int FromAccount { get; set; }
-    public int ToAccount { get; set; }
+    public Guid Id { get; set; }
+    public Guid FromAccount { get; set; }
+    public Guid ToAccount { get; set; }
     public decimal TransferAmount { get; set; }
 }

@@ -8,7 +8,7 @@ namespace MicroRabbit.Banking.Domain.Commands;
 
 public class CreateTransferCommand : TransferCommand
 {
-    public CreateTransferCommand(int from, int to, decimal amount) : base(from, to, amount)
+    public CreateTransferCommand(Guid from, Guid to, decimal amount) : base(from, to, amount)
     {
     }
 }

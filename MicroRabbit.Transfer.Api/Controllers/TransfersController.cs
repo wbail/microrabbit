@@ -20,12 +20,4 @@ public class TransfersController : ControllerBase
     {
         return Ok(_transferService.GetTransferLogs());
     }
-
-    //[HttpPost]
-    //public IActionResult Post([FromBody] AccountTransfer accountTransfer)
-    //{
-    //    _accountService.Transfer(accountTransfer);
-
-    //    return Ok(accountTransfer);
-    //}
 }

@@ -17,11 +17,9 @@ public class TransferEventHandler : IEventHandler<TransferCreatedEvent>
     // TODO: Implement the Handle method
     public Task Handle(TransferCreatedEvent @event)
     {
-        Random random = new Random();
-
         _transferRepository.Add(new TransferLog()
         {
-            Id = random.Next(100000000),
+            Id = Guid.NewGuid(),
             FromAccount = @event.From,
             ToAccount = @event.To,
             TransferAmount = @event.Amount

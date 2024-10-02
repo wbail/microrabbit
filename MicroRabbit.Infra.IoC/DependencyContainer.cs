@@ -6,20 +6,19 @@ using MicroRabbit.Banking.Data.Context;
 using MicroRabbit.Banking.Data.Repository;
 using MicroRabbit.Banking.Domain.CommandHandlers;
 using MicroRabbit.Banking.Domain.Commands;
-using MicroRabbit.Banking.Domain.Events;
 using MicroRabbit.Banking.Domain.Interfaces;
 using MicroRabbit.Domain.Core.Bus;
 using MicroRabbit.Infra.Bus;
+using MicroRabbit.Transfer.Application.Interfaces;
+using MicroRabbit.Transfer.Application.Services;
+using MicroRabbit.Transfer.Data.Context;
+using MicroRabbit.Transfer.Data.Repository;
+using MicroRabbit.Transfer.Domain.EventHandlers;
+using MicroRabbit.Transfer.Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using RabbitMQ.Client;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MicroRabbit.Infra.IoC;
 
@@ -41,19 +40,28 @@ public static class DependencyContainer
         // Domain banking commands
         services.AddTransient<IRequestHandler<CreateTransferCommand, bool>, TransferCommandHandler>();
 
-        // Application Services
-        services.AddTransient<IAccountService, AccountService>();
-        //services.AddTransient<ITransferService, TransferService>();
+        // Domain Events
+
+        services.AddTransient<IEventHandler<Transfer.Domain.Events.TransferCreatedEvent>, TransferEventHandler>();
 
         // Data
-
         services.AddDbContext<BankingDbContext>(options =>
         {
             options.UseNpgsql(configuration.GetConnectionString("BankingDbContext"));
         });
 
+        services.AddDbContext<TransferDbContext>(options =>
+        {
+            options.UseNpgsql(configuration.GetConnectionString("TransferDbContext"));
+        });
 
         services.AddTransient<IAccountRepository, AccountRepository>();
-        //services.AddTransient<BankingDbContext>();
+        services.AddTransient<ITransferRepository, TransferRepository>();
+
+        // Application Services
+        services.AddScoped<IAccountService, AccountService>();
+        services.AddScoped<ITransferService, TransferService>();
+
+        
     }
 }

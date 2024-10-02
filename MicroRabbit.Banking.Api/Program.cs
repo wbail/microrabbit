@@ -1,7 +1,5 @@
 using MicroRabbit.Infra.Bus;
 using MicroRabbit.Infra.IoC;
-using Microsoft.AspNetCore.Builder.Extensions;
-using Microsoft.Extensions.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 

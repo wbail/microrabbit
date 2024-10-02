@@ -18,6 +18,7 @@ using MicroRabbit.Transfer.Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using System.Reflection;
 
 namespace MicroRabbit.Infra.IoC;
@@ -35,7 +36,14 @@ public static class DependencyContainer
         });
 
         // Domain Bus
-        _ = services.AddTransient<IEventBus, RabbitMQBus>();
+        _ = services.AddTransient<IEventBus, RabbitMQBus>(sp =>
+        {
+            var scopeFactory = sp.GetRequiredService<IServiceScopeFactory>();
+            return new RabbitMQBus(sp.GetRequiredService<IMediator>(), sp.GetRequiredService<IOptions<RabbitMqProperties>>(), scopeFactory);
+        });
+
+        // Subscriptions
+        _ = services.AddTransient<TransferEventHandler>();
 
         // Domain banking commands
         services.AddTransient<IRequestHandler<CreateTransferCommand, bool>, TransferCommandHandler>();

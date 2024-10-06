@@ -23,7 +23,7 @@ public class AccountService : IAccountService
         return _accountRepository.GetAccounts();
     }
 
-    public void Transfer(AccountTransfer accountTransfer)
+    public void Transfer(AccountTransferRequest accountTransfer)
     {
         var createTransferCommand = new CreateTransferCommand
         (

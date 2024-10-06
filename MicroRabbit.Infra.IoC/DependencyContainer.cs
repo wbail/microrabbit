@@ -1,7 +1,10 @@
 ﻿using MediatR;
 using MediatR.NotificationPublishers;
+using MicroRabbit.Banking.Application.Handlers;
 using MicroRabbit.Banking.Application.Interfaces;
+using MicroRabbit.Banking.Application.Models;
 using MicroRabbit.Banking.Application.Services;
+using MicroRabbit.Banking.Application.Validators;
 using MicroRabbit.Banking.Data.Context;
 using MicroRabbit.Banking.Data.Repository;
 using MicroRabbit.Banking.Domain.CommandHandlers;
@@ -32,7 +35,11 @@ public static class DependencyContainer
         {
             c.Lifetime = ServiceLifetime.Singleton;
             c.NotificationPublisher = new TaskWhenAllPublisher();
+
             _ = c.RegisterServicesFromAssembly(Assembly.GetAssembly(typeof(RabbitMQBus))!);
+
+            _ = c.RegisterServicesFromAssemblyContaining<AccountTransferRequest>();
+            _ = c.RegisterServicesFromAssemblyContaining<TransferHandler>();
         });
 
         // Domain Bus
@@ -69,7 +76,6 @@ public static class DependencyContainer
         // Application Services
         services.AddScoped<IAccountService, AccountService>();
         services.AddScoped<ITransferService, TransferService>();
-
-        
+        services.AddTransient<IAccountTransferValidator, AccountTransferValidator>();
     }
 }

@@ -1,4 +1,5 @@
-﻿using MicroRabbit.Banking.Application.Interfaces;
+﻿using MediatR;
+using MicroRabbit.Banking.Application.Interfaces;
 using MicroRabbit.Banking.Application.Models;
 using MicroRabbit.Banking.Domain.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -9,10 +10,12 @@ namespace MicroRabbit.Banking.Api.Controllers;
 [Route("api/[controller]")]
 public class BankingsController : ControllerBase
 {
+    private readonly IMediator _mediator;
     private readonly IAccountService _accountService;
 
-    public BankingsController(IAccountService accountService)
+    public BankingsController(IMediator mediator, IAccountService accountService)
     {
+        _mediator = mediator;
         _accountService = accountService;
     }
 
@@ -23,9 +26,11 @@ public class BankingsController : ControllerBase
     }
 
     [HttpPost]
-    public IActionResult Post([FromBody] AccountTransfer accountTransfer)
+    public async Task<IActionResult> Post([FromBody] AccountTransferRequest accountTransfer)
     {
-        _accountService.Transfer(accountTransfer);
+        //todo: return errors to client if the request is invalid
+
+        await _mediator.Send(accountTransfer);
 
         return Ok(accountTransfer);
     }

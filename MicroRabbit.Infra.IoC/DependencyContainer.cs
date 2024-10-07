@@ -1,8 +1,5 @@
 ﻿using MediatR;
-using MediatR.NotificationPublishers;
-using MicroRabbit.Banking.Application.Handlers;
 using MicroRabbit.Banking.Application.Interfaces;
-using MicroRabbit.Banking.Application.Models;
 using MicroRabbit.Banking.Application.Services;
 using MicroRabbit.Banking.Application.Validators;
 using MicroRabbit.Banking.Data.Context;
@@ -23,7 +20,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Serilog;
-using System.Reflection;
 
 namespace MicroRabbit.Infra.IoC;
 
@@ -31,17 +27,7 @@ public static class DependencyContainer
 {
     public static void RegisterServices(this IServiceCollection services, IConfiguration configuration)
     {
-        // MediatR
-        _ = services.AddMediatR(c =>
-        {
-            c.Lifetime = ServiceLifetime.Singleton;
-            c.NotificationPublisher = new TaskWhenAllPublisher();
-
-            _ = c.RegisterServicesFromAssembly(Assembly.GetAssembly(typeof(RabbitMQBus))!);
-
-            _ = c.RegisterServicesFromAssemblyContaining<AccountTransferRequest>();
-            _ = c.RegisterServicesFromAssemblyContaining<TransferHandler>();
-        });
+        services.AddControllers();
 
         // Domain Bus
         _ = services.AddTransient<IEventBus, RabbitMQBus>(sp =>
@@ -80,5 +66,7 @@ public static class DependencyContainer
         services.AddTransient<IAccountTransferValidator, AccountTransferValidator>();
 
         _ = services.AddSerilog();
+
+        services.Configure<RabbitMqProperties>(configuration.GetSection("RabbitMQ"));
     }
 }

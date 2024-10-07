@@ -1,33 +1,17 @@
-using MicroRabbit.Infra.Bus;
 using MicroRabbit.Infra.IoC;
 
 var builder = WebApplication.CreateBuilder(args);
 
 OtelConfiguration.AddOpenTelemetryWithSerilog(builder.Logging, builder.Environment, builder.Configuration);
-
-// Add services to the container.
-
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(config =>
-{
-    config.SwaggerDoc("v1", new() { Title = "MicroRabbit.Banking.Api", Version = "v1" });
-});
-
-builder.Services.Configure<RabbitMqProperties>(builder.Configuration.GetSection("RabbitMQ"));
+SwaggerConfiguration.AddSwagger(builder.Services, builder.Configuration);
+MediatRConfiguration.AddMeditR(builder.Services);
 DependencyContainer.RegisterServices(builder.Services, builder.Configuration);
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+if (!app.Environment.IsProduction())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(config =>
-    {
-        config.SwaggerEndpoint("/swagger/v1/swagger.json", "MicroRabbit.Banking.Api v1");
-    });
+    app.UseSwaggerConfig();
 }
 
 app.UseHttpsRedirection();

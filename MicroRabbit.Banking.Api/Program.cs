@@ -3,6 +3,8 @@ using MicroRabbit.Infra.IoC;
 
 var builder = WebApplication.CreateBuilder(args);
 
+OtelConfiguration.AddOpenTelemetryWithSerilog(builder.Logging, builder.Environment, builder.Configuration);
+
 // Add services to the container.
 
 builder.Services.AddControllers();

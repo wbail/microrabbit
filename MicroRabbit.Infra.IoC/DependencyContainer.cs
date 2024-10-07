@@ -22,6 +22,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Serilog;
 using System.Reflection;
 
 namespace MicroRabbit.Infra.IoC;
@@ -77,5 +78,7 @@ public static class DependencyContainer
         services.AddScoped<IAccountService, AccountService>();
         services.AddScoped<ITransferService, TransferService>();
         services.AddTransient<IAccountTransferValidator, AccountTransferValidator>();
+
+        _ = services.AddSerilog();
     }
 }

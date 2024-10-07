@@ -29,7 +29,10 @@ public class TransferHandler : IRequestHandler<AccountTransferRequest>
 
         if (!isAccountTransferValid.IsValid)
         {
-            _logger.LogError($"Invalid transfer request: {isAccountTransferValid.Errors}");
+            foreach (var error in isAccountTransferValid.Errors)
+            {
+                _logger.LogError("Invalid transfer request: {Error}", error);
+            }
 
             return;
         }
@@ -43,6 +46,6 @@ public class TransferHandler : IRequestHandler<AccountTransferRequest>
 
         await _eventBus.SendCommand(createTransferCommand);
         
-        _logger.LogInformation($"Transfered from account '{request.AccountFrom}' to account '{request.AccountTo}' the amount '{request.TransferAmount}'");
+        _logger.LogInformation("Transfered from account '{AccountFrom}' to account '{AccountTo}' the amount '{TransferAmount}'", request.AccountFrom, request.AccountTo, request.TransferAmount);
     }
 }

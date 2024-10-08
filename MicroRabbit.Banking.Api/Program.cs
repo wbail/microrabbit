@@ -6,6 +6,7 @@ OtelConfiguration.AddOpenTelemetryWithSerilog(builder.Logging, builder.Environme
 SwaggerConfiguration.AddSwagger(builder.Services, builder.Configuration);
 MediatRConfiguration.AddMeditR(builder.Services);
 DependencyContainer.RegisterServices(builder.Services, builder.Configuration);
+HealthCheckConfiguration.AddHealthCheck(builder.Services, builder.Configuration);
 
 var app = builder.Build();
 
@@ -19,6 +20,8 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.UseHealthChecks();
 
 await app.RunAsync();
 

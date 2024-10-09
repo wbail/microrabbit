@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using FluentValidation;
+using MediatR;
 using MicroRabbit.Banking.Application.Interfaces;
 using MicroRabbit.Banking.Application.Models;
 using MicroRabbit.Banking.Domain.Models;
@@ -12,11 +13,13 @@ public class BankingsController : ControllerBase
 {
     private readonly IMediator _mediator;
     private readonly IAccountService _accountService;
+    private readonly IValidator<AccountTransferRequest> _validator;
 
-    public BankingsController(IMediator mediator, IAccountService accountService)
+    public BankingsController(IMediator mediator, IAccountService accountService, IValidator<AccountTransferRequest> validator)
     {
         _mediator = mediator;
         _accountService = accountService;
+        _validator = validator;
     }
 
     [HttpGet]
@@ -26,12 +29,17 @@ public class BankingsController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Post([FromBody] AccountTransferRequest accountTransfer)
+    public async Task<IResult> Post([FromBody] AccountTransferRequest accountTransfer)
     {
-        //todo: return errors to client if the request is invalid
+        var isAccountTransferValid = await _validator.ValidateAsync(accountTransfer);
+
+        if (!isAccountTransferValid.IsValid)
+        {
+            return Results.ValidationProblem(isAccountTransferValid.ToDictionary());
+        }
 
         await _mediator.Send(accountTransfer);
 
-        return Ok(accountTransfer);
+        return Results.Ok(accountTransfer);
     }
 }

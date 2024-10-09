@@ -11,7 +11,9 @@ public class AccountTransferValidator : AbstractValidator<AccountTransferRequest
     {
         RuleFor(x => x.AccountFrom)
             .NotEmpty()
-            .WithMessage("The 'account from' field cannot be empty");
+            .WithMessage("The 'account from' field cannot be empty")
+            .NotEqual(x => x.AccountTo)
+            .WithMessage("The 'account from' field must be different from the 'account to' field");
 
         RuleFor(x => x.AccountTo)
             .NotEmpty()
@@ -19,7 +21,7 @@ public class AccountTransferValidator : AbstractValidator<AccountTransferRequest
 
         RuleFor(x => x.TransferAmount)
             .NotEmpty()
-            .LessThanOrEqualTo(0)
+            .GreaterThan(0)
             .WithMessage("The 'transfer amount' field cannot be less than or equal to zero");
     }
 

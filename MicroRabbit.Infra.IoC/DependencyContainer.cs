@@ -1,5 +1,7 @@
-﻿using MediatR;
+﻿using FluentValidation;
+using MediatR;
 using MicroRabbit.Banking.Application.Interfaces;
+using MicroRabbit.Banking.Application.Models;
 using MicroRabbit.Banking.Application.Services;
 using MicroRabbit.Banking.Application.Validators;
 using MicroRabbit.Banking.Data.Context;
@@ -15,6 +17,7 @@ using MicroRabbit.Transfer.Data.Context;
 using MicroRabbit.Transfer.Data.Repository;
 using MicroRabbit.Transfer.Domain.EventHandlers;
 using MicroRabbit.Transfer.Domain.Interfaces;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,7 +30,7 @@ public static class DependencyContainer
 {
     public static void RegisterServices(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddControllers();
+        _ = services.AddControllers();
 
         // Domain Bus
         _ = services.AddTransient<IEventBus, RabbitMQBus>(sp =>
@@ -40,33 +43,34 @@ public static class DependencyContainer
         _ = services.AddTransient<TransferEventHandler>();
 
         // Domain banking commands
-        services.AddTransient<IRequestHandler<CreateTransferCommand, bool>, TransferCommandHandler>();
+        _ = services.AddTransient<IRequestHandler<CreateTransferCommand, bool>, TransferCommandHandler>();
 
         // Domain Events
 
-        services.AddTransient<IEventHandler<Transfer.Domain.Events.TransferCreatedEvent>, TransferEventHandler>();
+        _ = services.AddTransient<IEventHandler<Transfer.Domain.Events.TransferCreatedEvent>, TransferEventHandler>();
 
         // Data
-        services.AddDbContext<BankingDbContext>(options =>
+        _ = services.AddDbContext<BankingDbContext>(options =>
         {
             options.UseNpgsql(configuration.GetConnectionString("BankingDbContext"));
         });
 
-        services.AddDbContext<TransferDbContext>(options =>
+        _ = services.AddDbContext<TransferDbContext>(options =>
         {
             options.UseNpgsql(configuration.GetConnectionString("TransferDbContext"));
         });
 
-        services.AddTransient<IAccountRepository, AccountRepository>();
-        services.AddTransient<ITransferRepository, TransferRepository>();
+        _ = services.AddTransient<IAccountRepository, AccountRepository>();
+        _ = services.AddTransient<ITransferRepository, TransferRepository>();
 
         // Application Services
-        services.AddScoped<IAccountService, AccountService>();
-        services.AddScoped<ITransferService, TransferService>();
-        services.AddTransient<IAccountTransferValidator, AccountTransferValidator>();
+        _ = services.AddScoped<IAccountService, AccountService>();
+        _ = services.AddScoped<ITransferService, TransferService>();
+        _ = services.AddTransient<IAccountTransferValidator, AccountTransferValidator>();
+        _ = services.AddScoped<IValidator<AccountTransferRequest>, AccountTransferValidator>();
 
         _ = services.AddSerilog();
 
-        services.Configure<RabbitMqProperties>(configuration.GetSection("RabbitMQ"));
+        _ = services.Configure<RabbitMqProperties>(configuration.GetSection("RabbitMQ"));
     }
 }

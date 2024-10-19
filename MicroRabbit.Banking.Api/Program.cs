@@ -3,6 +3,7 @@ using MicroRabbit.Infra.IoC;
 var builder = WebApplication.CreateBuilder(args);
 
 OtelConfiguration.AddOpenTelemetryWithSerilog(builder.Logging, builder.Environment, builder.Configuration);
+HttpLoggingConfiguration.AddHttpLogging(builder.Services);
 SwaggerConfiguration.AddSwagger(builder.Services, builder.Configuration);
 MediatRConfiguration.AddMeditR(builder.Services);
 DependencyContainer.RegisterServices(builder.Services, builder.Configuration);
@@ -22,6 +23,8 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.UseHealthChecks();
+
+app.UseHttpLogging();
 
 await app.RunAsync();
 

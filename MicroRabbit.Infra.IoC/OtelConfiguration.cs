@@ -1,8 +1,11 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using OpenTelemetry.Exporter;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using Serilog;
 
 namespace MicroRabbit.Infra.IoC;
@@ -55,5 +58,25 @@ public static class OtelConfiguration
                 };
             })
             .CreateLogger();
+    }
+
+    public static IServiceCollection AddOpenTelemetryWithSerilog(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddOpenTelemetry()
+            .ConfigureResource(resource => resource.AddService(configuration.GetRequiredSection("ApplicationName").Value!))
+            .WithTracing(tracing =>
+            {
+                tracing
+                    .AddHttpClientInstrumentation()
+                    .AddAspNetCoreInstrumentation();
+
+                tracing.AddOtlpExporter(config =>
+                {
+                    config.Endpoint = new Uri("http://localhost:30060/ingest/otlp/v1/traces");
+                    config.Protocol = OtlpExportProtocol.HttpProtobuf;
+                });
+            });
+
+        return services;
     }
 }
